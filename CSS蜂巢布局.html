@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>蜂巢布局</title>
+    <style>
+        *{
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        html{
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .line{
+            display: flex;
+            width:100%;
+            margin-bottom: calc(-100vw/10/6);
+        }
+        .line:nth-child(even){
+            transform: translateX(calc(-100vw/10/2));
+        }
+        .item{
+            flex-shrink: 0;
+            width: calc(100vw/10);
+            height: calc(100vw/10);
+            background-size: 100% 100%;
+            -webkit-clip-path: polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%);
+            clip-path: polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%);
+            transition: 0.3s all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+    </div>
+
+    <script>
+        const imgUrlbase = '../images/';
+        const container = document.querySelector(".container");
+        let htmlStr = ''
+        // 创建10行
+        for (let i = 0; i < 10; i++) {
+            htmlStr += `<div class="line" data-nth="${i%2==0? 'odd':'even'}">`
+            for (let j = 0; j < 11; j++) {
+                // 在1-12之间随机取一个数
+                const num = Math.floor(Math.random() * 12) + 1;
+                const imgUrl = `${imgUrlbase}${num}.png`;
+                htmlStr += `<div class="item" data-index="${j}" style="background:url(${imgUrl});"></div>`
+            }
+            htmlStr += `</div>`
+        }
+        container.innerHTML = htmlStr;
+
+
+        // 缩放比例 放大1.2倍，缩小0.8倍，正常1倍
+        const zoomInratio = 1.2;
+        const zoomOutratio = 0.8;
+        const normalratio = 1;
+        // 缩小或放大某个元素下的指定元素大小
+        function itemShrink(node,index){
+            node? itemZoom(node.children[index],zoomOutratio): null
+        };
+        // 放大或缩小元素
+        function itemZoom(node,ratio){
+            node? node.style.transform = `scale(${ratio})`:null;
+        };
+        // 将所有元素比例设置为正常
+        function itemNormal(){
+            items.forEach(element => {
+                itemZoom(element,normalratio);
+            })
+        };
+
+        const items = document.querySelectorAll(".item");
+        container.addEventListener("mouseover", function(e){
+            itemNormal()
+            if(e.target.classList.value.includes('item')){
+                // 获取当前元素的索引
+                const index = e.target.dataset.index;
+                // 获取当前元素的父元素
+                const currentParent = e.target.parentElement
+                // 放大指定元素
+                itemZoom(e.target,zoomInratio);
+                // 缩小相邻元素
+                itemZoom(e.target.nextElementSibling,zoomOutratio);
+                itemZoom(e.target.previousElementSibling,zoomOutratio);
+                // 如果是偶数行
+                const next = currentParent.nextElementSibling
+                const prev = currentParent.previousElementSibling
+                itemShrink(next,index)
+                itemShrink(prev,index)
+                if(currentParent.dataset.nth == 'even'){
+                    itemShrink(next,index-1)
+                    itemShrink(prev,index-1)
+                }
+                // 如果是奇数行
+                if(currentParent.dataset.nth == 'odd'){
+                    itemShrink(next,+index+1)
+                    itemShrink(prev,+index+1)
+                }
+            }
+        })
+        
+        container.addEventListener("mouseleave", function(e){
+            itemNormal()
+        })
+    </script>
+</body>
+</html>
