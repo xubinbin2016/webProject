@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS中的accent-color属性改变输入框，多选框等颜色</title>
+    <style>
+        input[type="checkbox"] {
+            accent-color: red;
+        }
+
+        input[type="radio"] {
+            accent-color: green;
+        }
+
+        input[type="range"] {
+            accent-color: yellow;
+        }
+        progress {
+            accent-color: rgb(162, 0, 255);
+        }
+
+        input[type="text"]:focus{
+            outline: none;
+            border-color: rgb(255, 0, 230);
+            caret-color: rgb(255, 0, 230);
+        }
+    </style>
+</head>
+<body>
+    
+    <h1>复选框</h1>
+    上海<input type="checkbox" name="city" checked id="">
+    北京<input type="checkbox" name="city" checked id="">
+    深圳<input type="checkbox" name="city" checked id="">
+    <h1>单选框</h1>
+    男<input type="radio" name="sex" checked id="">
+    女<input type="radio" name="sex" checked id="">
+    <h1>范围</h1>
+    <input type="range" name="range" id="">
+    <h1>进度条</h1>
+    <progress id="file" max="100" value="70">70%</progress>
+    <h1>输入框</h1>
+    <input type="text">
+</body>
+</html>
