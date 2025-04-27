@@ -1,0 +1,31 @@
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+html{
+    overflow: hidden;
+    cursor: pointer;
+}
+
+@n:10;
+@size:calc(100vw/@n);
+@sizeHalf:calc(@size/-2);
+
+.line{
+    display: flex;
+    width:100%;
+    margin-bottom: calc(@size/-6);
+    &:nth-child(even){
+        transform: translateX(@sizeHalf);
+    }
+    .item{
+        flex-shrink: 0;
+        width: @size;
+        height: @size;
+        background-size: 100% 100%;
+        -webkit-clip-path: polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%);
+        clip-path: polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%);
+        transition: 0.3s all;
+    }
+}

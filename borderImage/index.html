@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>border渐变边框的实现方式</title>
+    <style>
+        *{
+            padding: 0;
+            margin: 0;
+        }
+        body{
+            padding-left: 20px;
+        }
+        .btn{
+            width: 200px;
+            height: 80px;
+            line-height: 80px;
+            margin: 10px;
+            text-align: center;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    
+    <h1>第一种：使用border-image属性实现边框渐变效果</h1>
+    <p><strong>注意：</strong>这个属性添加会导致原有的边框样式失效（包括圆角）</p>
+    <style>
+        .btn1{
+            border-style: solid;
+            border-width: 10px;
+            border-image: linear-gradient(to right, #0066ff, #ff32d6) 1 1 1 1 ;
+        }
+    </style>
+    <div class="btn btn1">button</div>
+
+    <hr>
+
+    <h1>第二种：使用::after伪元素和background-image实现边框渐变效果</h1>
+    <p><strong>注意：</strong>这个方法可以使用圆角样式</p>
+    <style>
+        .btn{
+            position: relative;
+            background: #ffffff;
+        }
+        .btn2::after{
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+            width: 100%;
+            height: 100%;
+            padding: 10px;
+            background-image: linear-gradient(to right, #0066ff, #ff32d6);
+        }
+        </style>
+    <div class="btn btn2">button</div>
+    <hr>
+
+    <h1>第三种：使用::after伪元素和background-image实现边框渐变效果,定位在主元素上方，再挖空遮罩mask中间部分</h1>
+    <p><strong>注意：</strong>这个办法无法锁定主元素</p>
+    <style>
+        .btn3::after{
+            content: "";
+            position: absolute;
+            inset: -10px;/*设置元素的各个边距，向内-10px,也就是向外扩张10px*/
+            background: linear-gradient(to right, #0066ff, #ff32d6);
+            padding: 10px;
+            mask:linear-gradient(#fff 0 0) content-box,/*外层遮罩*/
+            linear-gradient(#fff 0 0);/*内层遮罩*/
+            mask-composite: exclude;/*排除重叠区域，仅显示边框部分*/
+        }
+    </style>
+    <div class="btn btn3">button</div>
+
+    
+    <h1><strong>拓展：</strong>实现圆角样式的边框渐变效果</h1>
+    <ol>
+        <li>
+            <p>上面的第一种和第三种都无法完美实现，第二种可以实现</p>
+            <style>
+                .btn4{
+                    border-radius: 5px;
+                }
+                .btn4::after{
+                    border-radius: 5px;
+                }
+            </style>
+            <div class="btn btn2 btn4">button</div>
+        </li>
+    </ol>
+
+
+</body>
+</html>
