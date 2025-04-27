@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>columns属性实现多列布局</title>
+
+    <style>
+        .layout-container {
+            width: min(1000px, 100%);
+            margin: 0 auto;
+            columns: 4 240px;
+            text-align: center;
+            font-size: 0;
+        }
+        img {
+            width: 240px;
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>columns属性实现多列布局</h1>
+    <p><strong>注意：</strong>这个排列顺序是先自上而下，然后从左到右</p>
+    <div class="layout-container">
+        <img src="../images/1.png" alt="">
+        <img src="../images/2.png" alt="">
+        <img src="../images/3.png" alt="">
+        <img src="../images/4.png" alt="">
+        <img src="../images/5.png" alt="">
+        <img src="../images/6.png" alt="">
+        <img src="../images/7.png" alt="">
+        <img src="../images/8.png" alt="">
+        <img src="../images/9.png" alt="">
+        <img src="../images/10.png" alt="">
+        <img src="../images/11.png" alt="">
+        <img src="../images/12.png" alt="">
+    </div>
+</body>
+</html>
