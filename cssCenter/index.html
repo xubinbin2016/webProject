@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS水平垂直居中方法汇总</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        .outer{
+            position: relative;
+            width: 200px;
+            height: 200px;
+            border: 1px solid #000000;
+        }
+    </style>
+</head>
+<body>
+    <h1>第一种：position定位和margin负值法</h1>
+    <p><strong>注意：</strong>此方法内部水平居中元素必须有宽高，否则margin负值无法计算</p>
+    <style>
+        .inner1{
+            width: 100px;
+            height: 100px;
+            background-color: #ff0000;
+            
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin: -50px 0 0 -50px;
+        }
+    </style>
+    <div class="outer">
+        <div class="inner1"></div>
+    </div>
+
+
+
+    <h1>第二种：position定位和transform法</h1>
+    <p><strong>注意：</strong>此方法内部元素无需知道宽高即可实现水平垂直居中</p>
+    <style>
+        .inner2{
+            background-color: #ff0000;
+
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+    <div class="outer">
+        <div class="inner2">内容</div>
+    </div>
+
+    <h1>第三种：position定位和inset:0,margin:auto法</h1>
+    <p><strong>注意：</strong>此方法内部元素宽高必须设置，否则会铺满整个外部元素，实现代码简洁</p>
+    <style>
+        .inner3{
+            background-color: #ff0000;
+            width: 100px;
+            height: 100px;
+            
+            position: absolute;
+            inset: 0;
+            margin: auto;
+        }
+    </style>
+    <div class="outer">
+        <div class="inner3">内容</div>
+    </div>
+
+    <h1>第四种：flexbox布局法</h1>
+    <p><strong>注意：</strong>此方法内部元素无需知道宽高即可实现水平垂直居中</p>
+    <style>
+        .outer-flexbox{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .inner4{
+            background-color: #ff0000;
+        }
+    </style>
+    <div class="outer outer-flexbox">
+        <div class="inner4">内容</div>
+    </div>
+
+    <h1>第五种：grid布局法</h1>
+    <p><strong>注意：</strong>此方法内部元素无需知道宽高即可实现水平垂直居中</p>
+    <style>
+        .outer-grid{
+            display: grid;
+            place-items: center;
+        }
+        .inner5{
+            background-color: #ff0000;
+        }
+    </style>
+    <div class="outer outer-grid">
+        <div class="inner5">内容</div>
+    </div>
+
+    <h1>第六种：position定位top: 0;left: 0;right: 0;bottom: 0;和margin:auto法</h1>
+    <p><strong>注意：</strong>此方法内部水平居中元素必须有宽高，否则内部元素会铺满整个外部元素，实现代码简洁</p>
+    <style>
+        .inner6{
+            width: 100px;
+            height: 100px;
+            background-color: #ff0000;
+            
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+        }
+    </style>
+    <div class="outer">
+        <div class="inner6">内容</div>
+    </div>
+
+
+    <h1>第七种：表格布局，display:table-cell和vertical-align:middle法</h1>
+    <style>
+        .outer7{
+            height: 200px;
+            width: 200px;
+            border: 1px solid #000000;
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+        }
+        .inner7{
+            width: 100px;
+            height: 100px;
+            background-color: #ff0000;
+            display: inline-block;
+        }
+    </style>
+    <div class="outer7">
+        <div class="inner7">内容</div>
+    </div>
+
+    <h1>第八种：flexbox布局法+margin:auto</h1>
+    <p><strong>注意：</strong>此方法内部元素无需知道宽高即可实现水平垂直居中</p>
+    <style>
+        .outer8{
+            height: 200px;
+            width: 200px;
+            border: 1px solid #000000;
+            display: flex;
+        }
+        .inner8{
+            background-color: #ff0000;
+            margin: auto;
+        }
+    </style>
+    <div class="outer8">
+        <div class="inner8">内容</div>
+    </div>
+</body>
+</html>
