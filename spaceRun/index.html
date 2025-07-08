@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国空间站轨道模拟</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            overflow: hidden;
+            background: #000;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            height: 100vh;
+        }
+        
+        #canvas-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .controls {
+            position: absolute;
+            top: 70px;
+            right: 20px;
+            background: rgba(0, 20, 40, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(100, 180, 255, 0.3);
+            backdrop-filter: blur(5px);
+            z-index: 10;
+            width: 220px;
+        }
+        
+        .controls h3 {
+            margin-bottom: 12px;
+            color: #29b6f6;
+            font-size: 1.2rem;
+            text-align: center;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(100, 180, 255, 0.3);
+        }
+        
+        .control-item {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            font-size: 0.95rem;
+        }
+        
+        .control-item span {
+            width: 120px;
+            color: #bbdefb;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            flex-direction: column;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(41, 182, 246, 0.3);
+            border-top: 5px solid #29b6f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .texture-loading {
+            color: #29b6f6;
+            margin-top: 15px;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        
+        .debug-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            color: #0f0;
+            z-index: 20;
+            margin-bottom: 10px;
+        }
+        
+        .speed-indicator {
+            background: rgba(10, 30, 60, 0.7);
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-top: 8px;
+            text-align: center;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container">
+        <canvas id="webgl-canvas"></canvas>
+        
+        <div class="debug-info">
+            空间站位置: <span id="station-position">(0.00, 0.00, 0.00)</span>
+        </div>
+        
+        <div class="controls">
+            <h3>控制方式</h3>
+            <div class="control-item">
+                <span>旋转场景：</span>鼠标拖动
+            </div>
+            <div class="control-item">
+                <span>缩放场景：</span>鼠标滚轮
+            </div>
+            <div class="control-item">
+                <span>轨道显示：</span>按 T 键
+            </div>
+            <div class="control-item">
+                <span>公转速度：</span>+/- 键
+            </div>
+            <div class="control-item">
+                <span>当前速度：</span><span id="speed-display">1.0x</span>
+            </div>
+            
+            <div class="speed-indicator">
+                公转周期: <span id="period-value">90</span>分钟
+            </div>
+        </div>
+        
+        <div id="loading-screen" class="loading">
+            <div class="spinner"></div>
+            <div class="texture-loading">正在初始化太空场景...</div>
+        </div>
+    </div>
+    <script src="./index.js"></script>
+</body>
+</html>

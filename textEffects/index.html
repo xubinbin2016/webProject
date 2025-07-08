@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全屏文字上升特效 | 光粒子特效</title>
+    <script src="./three.min.js"></script>
+    <script src="./OrbitControls.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+            font-family: 'Microsoft YaHei', sans-serif;
+            color: white;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .overlay h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #ff66cc;
+            text-shadow: 0 0 20px rgba(255, 100, 200, 0.8);
+            text-align: center;
+        }
+        
+        .start-btn {
+            background: linear-gradient(to right, #ff3366, #cc00cc);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 5px 20px rgba(255, 0, 128, 0.5);
+            transition: all 0.3s;
+        }
+        
+        .start-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 7px 25px rgba(255, 0, 128, 0.7);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        canvas {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        
+        .music-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: 1px solid rgba(255,100,200,0.5);
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s;
+        }
+        
+        .music-toggle:hover {
+            transform: scale(1.1);
+            background: rgba(100,0,50,0.8);
+            box-shadow: 0 0 15px rgba(255, 100, 200, 0.7);
+        }
+        
+        /* 旋转动画定义 */
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .rotating {
+            animation: rotate 2s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay" id="overlay">
+        <h1>文 字 全 屏 漂 浮 特 效</h1>
+        <button class="start-btn" id="startBtn">开始体验</button>
+    </div>
+
+    <button id="musicToggle" class="music-toggle">
+        <span id="musicIcon">♪</span>
+    </button>
+    
+    <audio id="backgroundMusic">
+        <source src="./bg.mp3" type="audio/mpeg">
+    </audio>
+    
+    <script>
+        // 获取连接后面的参数
+        function getParameterByName(name) {
+            const url = window.location.href;
+            name = name.replace(/[\[\]]/g, '\\$&');
+            var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, ' '));
+        }
+        const paramX = parseInt(getParameterByName('x'), 10) || 0;
+
+        // 初始化场景
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x000000);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        camera.position.z = 50;
+        camera.position.x = paramX;
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(renderer.domElement);
+        
+        // 添加控制器
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        
+        // 灯光设置
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
+        directionalLight.position.set(0, 0, 1);
+        scene.add(directionalLight);
+        
+        // 添加点光源
+        const pointLight = new THREE.PointLight(0xff3366, 2, 100);
+        pointLight.position.set(10, 10, 20);
+        scene.add(pointLight);
+        
+        // 添加背景图片
+        const textureLoader = new THREE.TextureLoader();
+        textureLoader.load('./bg.jpg', 
+        function(texture) {
+            scene.background = texture;
+        });
+        
+        // 文字内容
+        const texts = [
+            "三维特效", "视觉盛宴", "数字艺术", "创意编程", 
+            "未来科技", "沉浸体验", "动态效果", "WebGL",
+            "Three.js", "前端开发", "酷炫动画", "科技创新",
+            "交互设计", "虚拟现实", "增强现实", "元宇宙",
+            "人工智能", "大数据", "云计算", "区块链",
+            "深度学习", "物联网", "边缘计算", "量子计算",
+            "数字化转型", "智慧城市", "工业4.0", "智能家居"
+        ];
+        
+        const textMeshes = [];
+        let hue = 0;
+        let lastColorChange = 0;
+        const colorChangeInterval = 3000;
+        let textSpeed = 0.3;
+        let textCount = 200;
+        let colorChangeQueue = [];
+        let lastFrameTime = 0;
+        const frameRate = 60;
+        const frameInterval = 1000 / frameRate;
+        
+        // ================== 圆形光粒子系统 ==================
+        let particlesCount = 800;
+        const particles = [];
+        let particlesSystem = null;
+        let velArray = null;
+        const particleSize = 2.5;
+        
+        // 创建圆形粒子纹理
+        function createParticleTexture() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const size = 128;
+            canvas.width = size;
+            canvas.height = size;
+            
+            // 绘制圆形渐变
+            const center = size / 2;
+            const gradient = ctx.createRadialGradient(center, center, 0, center, center, center);
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+            gradient.addColorStop(0.4, 'rgba(200, 230, 255, 0.8)');
+            gradient.addColorStop(1, 'rgba(100, 150, 255, 0)');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(center, center, center, 0, Math.PI * 2);
+            ctx.fill();
+            
+            return canvas;
+        }
+        
+        const particleTexture = new THREE.CanvasTexture(createParticleTexture());
+        
+        function createParticles() {
+            if(particlesSystem) {
+                scene.remove(particlesSystem);
+                particlesSystem.geometry.dispose();
+                particlesSystem.material.dispose();
+            }
+            
+            particles.length = 0;
+            
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particlesMaterial = new THREE.PointsMaterial({
+                color: 0xffffff,
+                size: particleSize,
+                transparent: true,
+                opacity: 0.7,
+                blending: THREE.AdditiveBlending,
+                map: particleTexture,
+                depthTest: false
+            });
+            
+            const posArray = new Float32Array(particlesCount * 3);
+            velArray = new Float32Array(particlesCount);
+            
+            for(let i = 0; i < particlesCount * 3; i += 3) {
+                posArray[i] = (Math.random() - 0.5) * window.innerWidth;
+                posArray[i+1] = (Math.random() - 0.5) * window.innerHeight * 2;
+                posArray[i+2] = (Math.random() - 0.5) * 200;
+                
+                velArray[i/3] = 0.2 + Math.random() * 0.5;
+                
+                particles.push({
+                    speed: velArray[i/3],
+                    rotation: Math.random() * Math.PI * 2
+                });
+            }
+            
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            particlesSystem = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(particlesSystem);
+        }
+        
+        createParticles();
+        
+        // ================== 文字系统 ==================
+        // 创建文字平面
+        function createTextPlane(text, yPos) {
+            // 动态计算字体大小
+            const fontSize = Math.max(60, Math.min(120, Math.floor(150 - text.length * 10)));
+            
+            // 动态计算纹理尺寸
+            const canvasWidth = Math.max(512, Math.min(1024, text.length * 100));
+            const canvasHeight = Math.max(128, Math.min(256, fontSize * 1.5));
+            
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+            
+            ctx.font = `bold ${fontSize}px "Microsoft YaHei", sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+            gradient.addColorStop(0, `hsl(${hue}, 100%, 85%)`);
+            gradient.addColorStop(1, `hsl(${(hue+60)%360}, 100%, 85%)`);
+            
+            ctx.shadowColor = `hsl(${hue}, 100%, 70%)`;
+            ctx.shadowBlur = 25;
+            ctx.fillStyle = gradient;
+            ctx.fillText(text, canvas.width/2, canvas.height/2);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            const material = new THREE.MeshBasicMaterial({ 
+                map: texture, 
+                transparent: true,
+                opacity: 0.95,
+                side: THREE.DoubleSide
+            });
+            
+            // 根据文字长度调整平面大小
+            const planeWidth = Math.max(15, Math.min(25, text.length * 4));
+            const planeHeight = planeWidth * (canvasHeight / canvasWidth);
+            
+            const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+            const mesh = new THREE.Mesh(geometry, material);
+            
+            mesh.position.x = (Math.random() - 0.5) * (window.innerWidth / 4);
+            mesh.position.y = yPos;
+            mesh.position.z = (Math.random() - 0.5) * 100;
+            
+            scene.add(mesh);
+            textMeshes.push({ mesh, canvas, ctx, texture, text });
+            return mesh;
+        }
+        
+        // 初始化满屏文字
+        function initFullScreenTexts() {
+            // 先移除现有文字
+            textMeshes.forEach(obj => {
+                scene.remove(obj.mesh);
+                obj.mesh.geometry.dispose();
+                obj.mesh.material.dispose();
+                obj.texture.dispose();
+            });
+            textMeshes.length = 0;
+            
+            const viewHeight = window.innerHeight / 5;
+            
+            for(let i = 0; i < textCount; i++) {
+                const text = texts[Math.floor(Math.random() * texts.length)];
+                const yPos = (Math.random() - 0.5) * viewHeight * 2 - 100;
+                createTextPlane(text, yPos);
+            }
+        }
+        
+        // 更新单个文字纹理
+        function updateTextTexture(obj) {
+            const { ctx, canvas, texture, text } = obj;
+            
+            // 重新计算字体大小
+            const fontSize = Math.max(60, Math.min(120, Math.floor(150 - text.length * 10)));
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+            gradient.addColorStop(0, `hsl(${hue}, 100%, 85%)`);
+            gradient.addColorStop(1, `hsl(${(hue+60)%360}, 100%, 85%)`);
+            
+            ctx.font = `bold ${fontSize}px "Microsoft YaHei", sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            ctx.shadowColor = `hsl(${hue}, 100%, 70%)`;
+            ctx.shadowBlur = 25;
+            ctx.fillStyle = gradient;
+            ctx.fillText(text, canvas.width/2, canvas.height/2);
+            
+            texture.needsUpdate = true;
+        }
+        
+        // 全屏文字变色
+        function changeAllTextColors() {
+            hue = (hue + 120) % 360;
+            colorChangeQueue = [...textMeshes];
+        }
+        
+        // 初始化
+        initFullScreenTexts();
+        
+        // 动画循环
+        function animate(timestamp) {
+            requestAnimationFrame(animate);
+            
+            // 帧率控制
+            const deltaTime = timestamp - lastFrameTime;
+            if (deltaTime < frameInterval) return;
+            lastFrameTime = timestamp - (deltaTime % frameInterval);
+            
+            // 处理颜色更新队列
+            if (colorChangeQueue.length > 0) {
+                const count = Math.min(8, colorChangeQueue.length);
+                for (let i = 0; i < count; i++) {
+                    const obj = colorChangeQueue.pop();
+                    if (obj) updateTextTexture(obj);
+                }
+            }
+            
+            // 定期更换颜色
+            if(timestamp - lastColorChange > colorChangeInterval) {
+                changeAllTextColors();
+                lastColorChange = timestamp;
+            }
+            
+            // ================== 更新粒子系统 ==================
+            const particlesPos = particlesSystem.geometry.attributes.position.array;
+            for(let i = 0; i < particlesCount * 3; i += 3) {
+                // 粒子向下飘落
+                particlesPos[i+1] -= velArray[i/3];
+                
+                // 粒子超出屏幕后重置到顶部
+                if(particlesPos[i+1] < -window.innerHeight) {
+                    particlesPos[i+1] = window.innerHeight;
+                    particlesPos[i] = (Math.random() - 0.5) * window.innerWidth;
+                    particlesPos[i+2] = (Math.random() - 0.5) * 200;
+                }
+            }
+            particlesSystem.geometry.attributes.position.needsUpdate = true;
+            
+            // 文字移动逻辑
+            textMeshes.forEach(obj => {
+                obj.mesh.position.y += textSpeed;
+                
+                if(obj.mesh.position.y > window.innerHeight / 5 + 50) {
+                    // 重置位置到底部
+                    obj.mesh.position.y = -100 - Math.random() * 50;
+                    obj.mesh.position.x = (Math.random() - 0.5) * (window.innerWidth / 4);
+                    obj.mesh.position.z = (Math.random() - 0.5) * 100;
+                    
+                    // 更换文字内容
+                    const newText = texts[Math.floor(Math.random() * texts.length)];
+                    obj.text = newText;
+                    updateTextTexture(obj);
+                }
+            });
+            
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        // 响应式设计
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        
+        // 音乐控制逻辑
+        let isPlaying = false;
+        const music = document.getElementById('backgroundMusic');
+        const musicToggle = document.getElementById('musicToggle');
+        const musicIcon = document.getElementById('musicIcon');
+        
+        musicToggle.addEventListener('click', function() {
+            if (isPlaying) {
+                // 暂停音乐和动画
+                music.pause();
+                musicToggle.classList.remove('rotating');
+            } else {
+                // 播放音乐并启动动画
+                music.play().catch(e => console.log("Play failed:", e));
+                musicToggle.classList.add('rotating');
+            }
+            isPlaying = !isPlaying;
+        });
+        // 音乐播放完后暂停播放动画
+        music.addEventListener('ended', function() {
+            isPlaying = false;
+            musicToggle.classList.remove('rotating');
+        });
+        
+        // 开始按钮
+        document.getElementById('startBtn').addEventListener('click', function() {
+            document.getElementById('overlay').classList.add('hidden');
+            animate(0);
+            
+            const music = document.getElementById('backgroundMusic');
+            music.volume = 0.5;
+            // 播放音乐并启动动画
+            isPlaying = !isPlaying;
+            music.play().catch(e => console.log("Play failed:", e));
+            musicToggle.classList.add('rotating');
+        });
+    </script>
+</body>
+</html>
